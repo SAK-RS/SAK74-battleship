@@ -2,6 +2,10 @@ import { WebSocketServer } from "ws";
 import { randomUUID } from "node:crypto";
 import { handleError } from "../services/handleError";
 import clients from "./clients";
+import { styleText } from "node:util";
+import { Message, messTypes } from "../types";
+import { regHandler } from "../handlers/reg.handler";
+import { UserType } from "../data/users";
 
 export const startWssServer = (port: number) => {
   const wss = new WebSocketServer({ port });
@@ -17,8 +21,20 @@ export const startWssServer = (port: number) => {
     const id = randomUUID();
     console.log("Client ID: ", id);
     clients.set(id, ws);
-    ws.on("message", (mess) => {
-      console.log(id, mess.toString());
+    ws.on("message", async (mess) => {
+      const command = JSON.parse(mess.toString()) as Message;
+      console.log(styleText("blue", "incomming <-- ") + command.type);
+      // console.log("Command: ", command);
+
+      switch (command.type) {
+        case messTypes.REG:
+          await regHandler(
+            JSON.parse(command.data) as Pick<UserType, "name" | "password">,
+            ws
+            // id
+          );
+          break;
+      }
     });
     ws.on("close", () => {
       console.log(`Client ${id} disconnected`);

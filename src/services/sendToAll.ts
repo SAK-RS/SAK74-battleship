@@ -7,8 +7,8 @@ export const sendToAll = (message: string) => {
     clients.forEach((ws) => {
       if (ws.readyState === ws.OPEN) {
         ws.send(message);
-        console.log(styleText("yellow", "--> "));
-        console.log((JSON.parse(message) as Message).type);
+        const type = (JSON.parse(message) as Message).type;
+        console.log(styleText("yellow", "outgoing --> ") + type);
       }
     });
     res();
