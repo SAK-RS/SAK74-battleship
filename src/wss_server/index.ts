@@ -4,8 +4,10 @@ import { clients } from "./clients";
 import { styleText } from "node:util";
 import { Message, messTypes, WsWithId } from "../types";
 import { regHandler } from "../handlers/reg.handler";
-import { UserType } from "../data/users";
+import type { UserType } from "../data/users";
 import { addToRoom, createRoom } from "../handlers/room.handler";
+import rooms from "../data/rooms";
+import { createUpdateRoomMess, sendToAll } from "../messages";
 
 export const startWssServer = (port: number) => {
   const wss = new WebSocketServer({ port });
@@ -45,6 +47,8 @@ export const startWssServer = (port: number) => {
       console.log(`Client ${ws.id} disconnected`);
       const clientId = clients.findIndex(({ id }) => id === ws.id);
       clients.splice(clientId, 1);
+      rooms.removePlayersRoom(ws.id);
+      sendToAll(createUpdateRoomMess());
     });
     ws.on("error", (err) => {
       console.log("Client error", err);

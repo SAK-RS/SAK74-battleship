@@ -47,7 +47,17 @@ class Rooms {
   }
 
   removeRoom(roomId: RoomId) {
-    this.rooms.delete(roomId);
+    this.rooms.get(roomId)?.roomUsers.forEach((user) => {
+      this.removePlayersRoom(user.index);
+    });
+  }
+
+  removePlayersRoom(userId?: string) {
+    this.rooms.forEach((room, id, allrooms) => {
+      if (room.roomUsers.some((user) => user.index === userId)) {
+        allrooms.delete(id);
+      }
+    });
   }
 }
 
