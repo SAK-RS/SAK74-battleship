@@ -1,6 +1,8 @@
 // import { createWinnersUpdateMess } from "../services/messages";
 
 import { randomUUID } from "node:crypto";
+import { PlayerId } from "./games";
+import { createWinnersUpdateMess, sendToAll } from "../messages";
 
 export interface UserType {
   name: string;
@@ -42,6 +44,21 @@ class UsersData {
   private validatePassword(id: string, password: string) {
     const user = this.users.get(id);
     return user?.password === password ? user : undefined;
+  }
+
+  updateWinner(_id: PlayerId) {
+    let user: UserType | undefined;
+    if ((user = this.getUserById(_id))) {
+      let winner: WinnerType | undefined;
+      if (
+        !(winner = this.winners.find((winner) => winner.name === user?.name))
+      ) {
+        this.winners.push({ name: user.name, wins: 1 });
+      } else {
+        winner.wins += 1;
+      }
+      sendToAll(createWinnersUpdateMess());
+    }
   }
 }
 

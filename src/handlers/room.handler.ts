@@ -1,10 +1,15 @@
 import { GameBoard } from "../data/games";
 import rooms from "../data/rooms";
 import users from "../data/users";
-import { createUpdateRoomMess, sendToAll } from "../messages";
+import {
+  createUpdateRoomMess,
+  sendGameCreateMess,
+  sendToAll,
+} from "../messages";
 import { sendErrorMessage } from "../services/handleError";
-import { WsWithId } from "../types";
+import type { WsWithId } from "../types";
 import { clients } from "../wss_server/clients";
+import { gameHandler } from "./game.handler";
 
 export const createRoom = (ws: WsWithId) => {
   if (ws.id) {
@@ -17,14 +22,13 @@ export const createRoom = (ws: WsWithId) => {
 };
 
 export const addToRoom = (ws: WsWithId, roomId: number) => {
-  console.log({ roomId });
+  // console.log({ roomId });
 
   if (!ws.id) {
     return;
   }
   const user = users.getUserById(ws.id);
   const room = rooms.getRoomById(roomId);
-
   if (!user || !room) {
     return;
   }
@@ -43,4 +47,10 @@ export const addToRoom = (ws: WsWithId, roomId: number) => {
   rooms.removeRoom(roomId);
   sendToAll(createUpdateRoomMess());
   const game = new GameBoard(ws1, ws);
+  game.players.forEach((player, id) => {
+    sendGameCreateMess(player.ws, game.gameId, id);
+    player.ws.on("message", function (data) {
+      return gameHandler(game, data);
+    });
+  });
 };

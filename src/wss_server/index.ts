@@ -40,8 +40,6 @@ export const startWssServer = (port: number) => {
             (JSON.parse(command.data) as { indexRoom: number }).indexRoom
           );
           break;
-        default:
-          throw Error("Unknown kommand");
       }
     });
     ws.on("close", () => {

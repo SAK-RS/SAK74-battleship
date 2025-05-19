@@ -1,5 +1,10 @@
 import usersData, { WrongPasswordError, type UserType } from "../data/users";
-import { createWinnersUpdateMess, sendRegMess, sendToAll } from "../messages";
+import {
+  createUpdateRoomMess,
+  createWinnersUpdateMess,
+  sendRegMess,
+  sendToAll,
+} from "../messages";
 import { WsWithId } from "../types";
 import { clients } from "../wss_server/clients";
 
@@ -15,7 +20,8 @@ export const regHandler = async (
     }
     ws.id = id;
     sendRegMess(ws, name, id);
-    await sendToAll(createWinnersUpdateMess());
+    sendToAll(createWinnersUpdateMess());
+    sendToAll(createUpdateRoomMess());
   } catch (err) {
     sendRegMess(
       ws,
