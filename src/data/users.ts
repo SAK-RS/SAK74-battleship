@@ -1,5 +1,4 @@
 import { randomUUID } from "node:crypto";
-import { PlayerId } from "./games";
 
 export interface UserType {
   name: string;
@@ -43,7 +42,7 @@ class UsersData {
     return user?.password === password ? user : undefined;
   }
 
-  updateWinner(_id: PlayerId) {
+  updateWinner(_id: string) {
     const user = this.getUserById(_id);
     if (user) {
       const winner = this.winners.find((winner) => winner.name === user?.name);

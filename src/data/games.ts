@@ -203,7 +203,8 @@ export class GameBoard {
     this.players.forEach(({ ws }) => {
       sendFinishGameMess(ws, this.currentTurn!);
     });
-    usersData.updateWinner(this.currentTurn!);
+    const winner = this.players.get(this.currentTurn!)!;
+    usersData.updateWinner(winner.ws.id!);
     sendToAll(createWinnersUpdateMess());
   }
 }
