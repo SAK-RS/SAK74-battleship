@@ -1,5 +1,3 @@
-import { UUID } from "crypto";
-import { WebSocket } from "ws";
+import { WsWithId } from "../types";
 
-const clients = new Map<UUID, WebSocket>();
-export default clients;
+export const clients: WsWithId[] = [];

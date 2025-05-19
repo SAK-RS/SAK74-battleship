@@ -1,11 +1,11 @@
 import { WebSocketServer } from "ws";
-import { randomUUID } from "node:crypto";
 import { handleError } from "../services/handleError";
-import clients from "./clients";
+import { clients } from "./clients";
 import { styleText } from "node:util";
-import { Message, messTypes } from "../types";
+import { Message, messTypes, WsWithId } from "../types";
 import { regHandler } from "../handlers/reg.handler";
 import { UserType } from "../data/users";
+import { addToRoom, createRoom } from "../handlers/room.handler";
 
 export const startWssServer = (port: number) => {
   const wss = new WebSocketServer({ port });
@@ -16,29 +16,38 @@ export const startWssServer = (port: number) => {
     await handleError(err instanceof Error ? err.message : "Unknown error");
   });
 
-  wss.on("connection", (ws, req) => {
+  wss.on("connection", (ws: WsWithId, req) => {
     console.log(`Ws Server is connected on ${req.headers.host}`);
-    const id = randomUUID();
-    console.log("Client ID: ", id);
-    clients.set(id, ws);
+    clients.push(ws);
     ws.on("message", async (mess) => {
       const command = JSON.parse(mess.toString()) as Message;
       console.log(styleText("blue", "incomming <-- ") + command.type);
-      // console.log("Command: ", command);
+      console.log("ID ", ws.id);
 
       switch (command.type) {
         case messTypes.REG:
-          await regHandler(
+          regHandler(
             JSON.parse(command.data) as Pick<UserType, "name" | "password">,
             ws
-            // id
           );
           break;
+        case messTypes.CREATE_ROOM:
+          createRoom(ws);
+          break;
+        case messTypes.ADD_TO_ROOM:
+          addToRoom(
+            ws,
+            (JSON.parse(command.data) as { indexRoom: number }).indexRoom
+          );
+          break;
+        default:
+          throw Error("Unknown kommand");
       }
     });
     ws.on("close", () => {
-      console.log(`Client ${id} disconnected`);
-      clients.delete(id);
+      console.log(`Client ${ws.id} disconnected`);
+      const clientId = clients.findIndex(({ id }) => id === ws.id);
+      clients.splice(clientId, 1);
     });
     ws.on("error", (err) => {
       console.log("Client error", err);

@@ -28,6 +28,10 @@ class UsersData {
     return { ...user, id };
   }
 
+  getUserById(id: string) {
+    return this.users.get(id);
+  }
+
   private getUserIdByname(name: string) {
     const user = Array.from(this.users.entries()).find(
       ([, user]) => user.name === name

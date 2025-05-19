@@ -1,15 +1,19 @@
-import WebSocket from "ws";
 import usersData, { WrongPasswordError, type UserType } from "../data/users";
-import { createWinnersUpdateMess, sendRegMess } from "../messages";
-import { sendToAll } from "../services/sendToAll";
+import { createWinnersUpdateMess, sendRegMess, sendToAll } from "../messages";
+import { WsWithId } from "../types";
+import { clients } from "../wss_server/clients";
 
 export const regHandler = async (
   user: Pick<UserType, "name" | "password">,
-  ws: WebSocket
-  // id: string
+  ws: WsWithId
 ) => {
   try {
     const { name, id } = usersData.addUser(user);
+    if (clients.some((client) => client.id === id)) {
+      sendRegMess(ws, name, id, "This user is already logged!");
+      return;
+    }
+    ws.id = id;
     sendRegMess(ws, name, id);
     await sendToAll(createWinnersUpdateMess());
   } catch (err) {

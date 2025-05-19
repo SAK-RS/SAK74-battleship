@@ -1,10 +1,12 @@
+import type { WebSocket } from "ws";
+
 export type Message = {
   type: string;
   data: string;
 };
 
 export type WsWithId = WebSocket & {
-  id: string;
+  id?: string;
 };
 
 export enum messTypes {
@@ -21,5 +23,3 @@ export enum messTypes {
   RANDOM_ATTACK = "randomAttack",
   GAME_FINISH = "finish",
 }
-
-export const BOARD_SIZE = 10;
