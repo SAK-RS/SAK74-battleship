@@ -11,12 +11,6 @@ const sendMesassage: <T>(ws: WebSocket, type: messTypes, data: T) => void = (
   type,
   data
 ) => {
-  // const mess = JSON.stringify({
-  //   type,
-  //   data: typeof data === "object" ? JSON.stringify(data) : data,
-  //   id: 0,
-  // }); // todo: remove
-  // console.log({ mess, data }); // todo: remove
   ws.send(
     JSON.stringify({
       type,

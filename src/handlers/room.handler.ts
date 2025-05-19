@@ -22,8 +22,6 @@ export const createRoom = (ws: WsWithId) => {
 };
 
 export const addToRoom = (ws: WsWithId, roomId: number) => {
-  // console.log({ roomId });
-
   if (!ws.id) {
     return;
   }

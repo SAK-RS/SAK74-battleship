@@ -22,7 +22,6 @@ export const startWssServer = (port: number) => {
     ws.on("message", async (mess) => {
       const command = JSON.parse(mess.toString()) as Message;
       console.log(styleText("blue", "incomming <-- ") + command.type);
-      console.log("ID ", ws.id);
 
       switch (command.type) {
         case messTypes.REG:

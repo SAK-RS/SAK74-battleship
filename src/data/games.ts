@@ -1,4 +1,10 @@
-import { sendAttackMess, sendFinishGameMess, sendTurnMess } from "../messages";
+import {
+  createWinnersUpdateMess,
+  sendAttackMess,
+  sendFinishGameMess,
+  sendToAll,
+  sendTurnMess,
+} from "../messages";
 import { WsWithId } from "../types";
 import { randomUUID } from "node:crypto";
 import usersData from "./users";
@@ -65,7 +71,6 @@ export class GameBoard {
 
   private getPlayers() {
     const [id1, id2] = Array.from(this.players.keys());
-
     return {
       active: this.players.get(this.currentTurn!)!,
       opposite: this.players.get(this.currentTurn === id1 ? id2 : id1)!,
@@ -77,7 +82,7 @@ export class GameBoard {
     if (active.shots.some((el) => el.x === x && el.y === y)) {
       return;
     }
-    opposite.shots.push({ x, y });
+    active.shots.push({ x, y });
     let status: StatusType = "miss";
     opposite.ships.forEach((ship, shipIdx) => {
       for (let piece = 0; piece < ship.length; piece += 1) {
@@ -112,9 +117,9 @@ export class GameBoard {
       });
       // sent turn mess
       if (status === "miss") {
-        const currentPlayer = this.changeCurrentTurn();
+        const currentTurn = this.changeCurrentTurn();
         this.players.forEach(({ ws }) => {
-          sendTurnMess(ws, currentPlayer);
+          sendTurnMess(ws, currentTurn);
         });
       }
     }
@@ -185,9 +190,8 @@ export class GameBoard {
     }
     squares.forEach(({ x, y }) => {
       const { active } = this.getPlayers();
-      const shots = active.shots;
       if (!active.shots.some((el) => el.x === x && el.y === y)) {
-        shots.push({ x, y });
+        active.shots.push({ x, y });
       }
       this.players.forEach(({ ws }) => {
         sendAttackMess(ws, { x, y }, "miss", this.currentTurn!);
@@ -200,7 +204,7 @@ export class GameBoard {
       sendFinishGameMess(ws, this.currentTurn!);
     });
     usersData.updateWinner(this.currentTurn!);
-    // games = games.filter((g) => g.gameId !== this.gameId);
+    sendToAll(createWinnersUpdateMess());
   }
 }
 
